@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>boostrap-框架-综合案例</title>
+  <!-- 1 引入它的css -->
+  <link rel="stylesheet" href="./lib/bootstrap.min.css">
+  <!-- 引入进度条 样式文件 -->
+  <link rel="stylesheet" href="./lib/Nprogress.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- 1 输入框和按钮 -->
+    <div class="input-group">
+      <input id="searchBookName" type="text" class="form-control" placeholder="请输入要寻找的书名" />
+      <span class="input-group-btn">
+        <button id="searchBtn" class="btn btn-default" type="button">
+          搜索
+        </button>
+        <button class="btn btn-success" id="addBtn">添加</button>
+      </span>
+    </div>
+
+    <hr />
+
+    <!-- 2 列表 -->
+    <table class="table table-bordered table-striped">
+      <thead>
+        <th>id</th>
+        <th>书名</th>
+        <th>作者</th>
+        <th>出版社</th>
+        <th>操作</th>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+
+  <!-- 编辑表单 -->
+  <div class="modal fade" id="myModal-change" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">修改</h4>
+        </div>
+        <div class="modal-body">
+          <form id="changeForm" autocomplete="off">
+            <input type="hidden" name="id">
+            <div class="form-group">
+              <label for="exampleInputEmail1">书名</label>
+              <input type="text" class="form-control" name="bookname" placeholder="bookname">
+            </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">作者</label>
+              <input type="text" class="form-control" name="author" placeholder="author">
+            </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">出版社</label>
+              <input type="text" class="form-control" name="publisher" placeholder="publisher">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+              <button type="submit" class="btn btn-primary">确认编辑</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加表单 -->
+  <div class="modal fade" id="myModal-add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">添加</h4>
+        </div>
+        <div class="modal-body">
+          <form id="addForm" autocomplete="off">
+            <div class="form-group">
+              <label for="exampleInputEmail1">书名</label>
+              <input type="text" class="form-control" name="bookname" placeholder="bookname">
+            </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">作者</label>
+              <input type="text" class="form-control" name="author" placeholder="author">
+            </div>
+            <div class="form-group">
+              <label for="exampleInputEmail1">出版社</label>
+              <input type="text" class="form-control" name="publisher" placeholder="publisher">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+              <button type="submit" class="btn btn-primary">确认添加</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- 引入js文件 -->
+  <script src="./lib/jquery.js"></script>
+  <script src="./lib/Nprogress.js"></script>
+  <script src="./lib/bootstrap.min.js"></script>
+  <script src="./lib/axios.js"></script>
+  <script src="./base.js"></script>
+  <script>
+
+
+    const tbody = document.querySelector('tbody')
+    const changeForm = document.querySelector('#changeForm')
+    const addForm = document.querySelector('#addForm')
+    const addBtn = document.querySelector('#addBtn')
+
+    const searchBookName = document.querySelector('#searchBookName')
+    const searchBtn = document.querySelector('#searchBtn')
+
+    render()
+
+    // 编辑 和 删除
+    tbody.addEventListener('click', (e) => {
+      // 编辑
+      if (e.target.classList.contains('changeBtn')) {
+        $('#myModal-change').modal('show');
+        const id = e.target.dataset.id
+        axios.get('/api/getbooks', {
+          params: {
+            appkey: '1318917',
+            id,
+          }
+        }).then(res => {
+          const obj = res.data.data[0]
+          for (const key in obj) {
+            changeForm.querySelector(`input[name=${key}]`).value = obj[key]
+          }
+        })
+      }
+
+      // 删除
+      if (e.target.classList.contains('deleteBtn')) {
+        const id = e.target.dataset.id
+        axios.delete('/api/delbook', {
+          params: {
+            appkey: '1318917',
+            id,
+          }
+        })
+          .then(res => {
+            render()
+          })
+      }
+    })
+
+    // 确认编辑
+    changeForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const data = $(changeForm).serialize() + '&appkey=1318917'
+      axios.put('/api/updatebook', data).then(res => {
+        changeForm.reset()
+        $('#myModal-change').modal('hide')
+        render()
+      })
+    })
+
+    // 添加
+    addBtn.addEventListener('click', (e) => $('#myModal-add').modal('show'))
+    // 确认添加
+    addForm.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const data = $(addForm).serialize() + '&appkey=1318917'
+      axios.post('/api/addbook', data).then(res => {
+        addForm.reset()
+        $('#myModal-add').modal('hide')
+        render()
+      })
+    })
+
+    // 搜索
+    searchBtn.addEventListener('click', (e) => render(searchBookName.value.trim()))
+
+
+    // 渲染
+    function render(bn) {
+      const params = { appkey: '1318917' }
+      if (bn) {
+        params.bookname = bn
+      }
+
+      axios.get('/api/getbooks', { params })
+        .then(res => {
+          const html = res.data.data.map(v => `
+            <tr>
+             <td>${v.id}</td> 
+             <td>${v.bookname}</td> 
+             <td>${v.author}</td> 
+             <td>${v.publisher}</td> 
+             <td>
+              <button class="btn btn-danger deleteBtn " data-id="${v.id}">删除</button>  
+              <button class="btn btn-info changeBtn " data-id="${v.id}">编辑</button>  
+            </td> 
+            </tr>
+          `).join('')
+          tbody.innerHTML = html
+        })
+    }
+
+  </script>
+</body>
+
+</html>

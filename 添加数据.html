@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+    <title>06-快速增加数据.html</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="./lib/axios.js"></script>
+    <script>
+        for (let index = 0; index < 10; index++) {
+            axios({
+                url: 'http://www.itcbc.com:3006/api/addbook',
+                method: 'POST',
+                data: {
+                    bookname: '演示' + index,
+                    author: '我自己你不知道' + index,
+                    publisher: '斑马出版社' + index,
+                    // 改为只有自己知道的key 长度 6-20
+                    appkey: '1318917',
+                },
+            });
+        }
+    </script>
+</body>
+
+</html>
