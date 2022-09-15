@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="./lib/bootstrap.min.css">
   <!-- 引入进度条 样式文件 -->
   <link rel="stylesheet" href="./lib/Nprogress.css">
+  <!-- 提示框 -->
+  <link rel="stylesheet" href="./lib/toastr.css">
 </head>
 
 <body>
@@ -117,6 +119,7 @@
   <script src="./lib/jquery.js"></script>
   <script src="./lib/Nprogress.js"></script>
   <script src="./lib/bootstrap.min.js"></script>
+  <script src="./lib/toastr.js"></script>
   <script src="./lib/axios.js"></script>
   <script src="./base.js"></script>
   <script>
@@ -153,16 +156,20 @@
 
       // 删除
       if (e.target.classList.contains('deleteBtn')) {
-        const id = e.target.dataset.id
-        axios.delete('/api/delbook', {
-          params: {
-            appkey: '1318917',
-            id,
-          }
-        })
-          .then(res => {
-            render()
+        if (confirm('Are you sure you want to delete')) {
+          const id = e.target.dataset.id
+          axios.delete('/api/delbook', {
+            params: {
+              appkey: '1318917',
+              id,
+            }
           })
+            .then(res => {
+              render()
+              // 提示用户
+              toastr.success('删除成功');
+            })
+        }
       }
     })
 
@@ -174,6 +181,8 @@
         changeForm.reset()
         $('#myModal-change').modal('hide')
         render()
+        // 提示用户
+        toastr.success('修改成功');
       })
     })
 
@@ -187,6 +196,8 @@
         addForm.reset()
         $('#myModal-add').modal('hide')
         render()
+        // 提示用户
+        toastr.success('添加成功');
       })
     })
 
